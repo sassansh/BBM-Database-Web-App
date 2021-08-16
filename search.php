@@ -4,7 +4,6 @@ use airmoi\FileMaker\FileMakerException;
 use airmoi\FileMaker\Object\Field;
 
 require_once ('utilities.php');
-require_once ('constants.php');
 require_once ('my_autoloader.php');
 
 session_set_cookie_params(0,'/','.ubc.ca',isset($_SERVER["HTTPS"]), true);
@@ -42,7 +41,7 @@ if (isset($_SESSION['databaseSearch']) and ($_SESSION['databaseSearch'])->getNam
         <?php Navbar(); ?>
 
         <!-- Page title below navbar -->
-        <?php TitleBannerSearch(database: DATABASE, paddingIndex: 3); ?>
+        <?php TitleBannerSearch(databaseName: $databaseSearch->getCleanName(), paddingIndex: 3); ?>
 
         <div class="container-fluid flex-grow-1">
             <!-- search or show all -->
@@ -146,9 +145,9 @@ if (isset($_SESSION['databaseSearch']) and ($_SESSION['databaseSearch'])->getNam
                             </div>
 
                             <!-- only with image select, tooltip to explain why disabled -->
-                            <div class="form-check form-switch" <?php if (!in_array(DATABASE, kDATABASES_WITH_IMAGES)) echo 'data-bs-toggle="tooltip" title="No images available"' ?>>
+                            <div class="form-check form-switch" <?php if (!$databaseSearch->hasImages()) echo 'data-bs-toggle="tooltip" title="No images available"' ?>>
                                 <label class="form-check-label">
-                                    <input type="checkbox" class="form-check-input checkbox-conditional-background" name="hasImage" <?php if (!in_array(DATABASE, kDATABASES_WITH_IMAGES)) echo 'disabled' ?>>
+                                    <input type="checkbox" class="form-check-input checkbox-conditional-background" name="hasImage" <?php if (!$databaseSearch->hasImages()) echo 'disabled' ?>>
                                     Only show records that contain an image
                                 </label>
                             </div>

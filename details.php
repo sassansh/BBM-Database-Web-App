@@ -3,7 +3,6 @@
 use airmoi\FileMaker\FileMakerException;
 
 require_once('utilities.php');
-require_once ('constants.php');
 require_once ('my_autoloader.php');
 
 session_set_cookie_params(0,'/','.ubc.ca',isset($_SERVER["HTTPS"]), true);
@@ -58,7 +57,7 @@ if(isset($_SERVER['HTTP_REFERER'])) {
     <body>
         <?php Navbar(); ?>
 
-        <?php TitleBannerDetail(DATABASE, ACCESSIONNUMBER, $previousPageLink); ?>
+        <?php TitleBannerDetail($databaseSearch->getCleanName(), ACCESSIONNUMBER, $previousPageLink); ?>
 
         <div class="container-fluid flex-grow-1">
             <!-- basic info plus images -->

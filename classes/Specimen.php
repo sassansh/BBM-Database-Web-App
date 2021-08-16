@@ -47,8 +47,10 @@ class Specimen
         $findCommand = $database->getFileMaker()->newFindCommand($database->getDetailLayout()->getName());
 
         # add a search param to the query to exactly '==' equal the accession number
+        # EDIT: == does not work with some since there are extra spaces
+        # Need to use '=' to match whole word not field
         if ($id !== '') {
-            $findCommand->addFindCriterion($database->getIDFieldName(), '==' . $id);
+            $findCommand->addFindCriterion($database->getIDFieldName(), '=' . $id);
         } else {
             throw new AssertionError(message: "Empty ID was given!");
         }
@@ -57,7 +59,12 @@ class Specimen
         $allRecordsFound = $result->getRecords();
 
         if (sizeof($allRecordsFound) != 1) {
-            throw new ErrorException(message: "No records or more than one records found. This is an internal error. Please contact the admin!");
+            # TODO remove this for production
+            $debug = implode(array_map(function(Record $record) {
+                $id = $record->getField('accessionNo');
+                return " - $id - ";
+            }, $allRecordsFound));
+            throw new ErrorException(message: "No records or more than one records found. This is an internal error. Please contact the admin! Id: $id. Records: $debug");
         }
 
         $this->record = $allRecordsFound[0];
@@ -84,7 +91,7 @@ class Specimen
             "avian", "herpetology", "mammal" => array("Location::country", "Location::stateProvince", "Location::locality", "Geolocation::verbatimElevation", "Geolocation::decimalLatitude", "Geolocation::decimalLongitude"),
             "fish" => array('country', 'stateProvince', 'verbatimLocality', 'decimalLatitude', 'decimalLongitude'),
             "miw", "mi" => array('country', 'stateProvince', 'Location', 'verbatimDepth', 'DecimalLatitude', 'DecimalLongitude', "Depth below water"),
-            "fossils" => array('country', 'stateProvince', 'locality'),
+            "fossils" => array('Country', 'Province/State', 'City', 'Locality Information'),
             default => array(),
         };
 
@@ -100,7 +107,6 @@ class Specimen
             }
         }
     }
-
 
     /**
      * Depending on the database in use, will try to get specimen images and add them
@@ -183,10 +189,29 @@ class Specimen
         }
     }
     private function _herbariumImageSetup() {
-        $url = getPhotoUrl(ACCESSIONNUMBER, DATABASE);
+        $url = $this->_getHerbariumImageUrl($this->id, $this->database->getName());
         if (@getimagesize($url)[0] > 0 && @getimagesize($url)[1] > 0) {
             array_push($this->images, new Image(url:$url, href: $url, alt: "Species image"));
         }
+    }
+    private function _getHerbariumImageUrl(string $identifier, string $databaseName): string
+    {
+        if ($databaseName === 'vwsp') {
+            return "https://herbweb.botany.ubc.ca/herbarium/images/vwsp_images/Large_web/".$identifier.".jpg";
+        }
+        else if ($databaseName === 'algae') {
+            return "https://herbweb.botany.ubc.ca/herbarium/images/ubcalgae_images/Large_web/".$identifier.".jpg";
+        }
+        else if ($databaseName === 'lichen') {
+            return "https://herbweb.botany.ubc.ca/herbarium/images/lichen_images/Large_web/".$identifier.".jpg";
+        }
+        else if ($databaseName === 'fungi') {
+            return "https://herbweb.botany.ubc.ca/herbarium/images/fungi_images/Large_web/".$identifier.".jpg";
+        }
+        else if ($databaseName === 'bryophytes') {
+            return "https://herbweb.botany.ubc.ca/herbarium/images/bryophytes_images/Large_web/".$identifier.".jpg";
+        }
+        else return '#';
     }
 
 
@@ -255,7 +280,6 @@ class Specimen
     }
 
 
-
     /**
      * With databases using different field naming conventions, some databases
      * use the following format, Taxon::family or Event::year. This function will remove
@@ -283,7 +307,7 @@ class Specimen
     static function mapFieldName(string $field): string
     {
         return match (strtolower($field)) {
-            'accession no', 'catalognumber', 'accessionno', 'id' => 'Accession Number',
+            'accession no', 'catalognumber', 'accessionno', 'catalogue number' => 'Accession Number',
             'sem #' => 'SEM Number',
             'nomennoun' => 'Genus',
             'specificepithet' => 'Species',

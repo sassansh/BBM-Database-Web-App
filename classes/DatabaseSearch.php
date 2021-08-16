@@ -17,6 +17,13 @@ use airmoi\FileMaker\Object\Result;
 class DatabaseSearch {
 
     /**
+     * A list of all the valid Database names!
+     * @var array|string[]
+     */
+    static array $ValidNames = ['algae', 'avian', 'bryophytes', 'entomology', 'fish',
+    'fossil', 'fungi', 'herpetology', 'lichen', 'mammal', 'mi', 'miw', 'vwsp'];
+
+    /**
      * The FileMaker instance connected to this database
      * @var FileMaker
      */
@@ -61,22 +68,22 @@ class DatabaseSearch {
         return new self($fileMaker, $databaseName);
     }
 
-    function getFileMaker(): FileMaker
+    public function getFileMaker(): FileMaker
     {
         return $this->fileMaker;
     }
 
-    function getName(): string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    function getSearchLayout(): Layout
+    public function getSearchLayout(): Layout
     {
         return $this->search_layout;
     }
 
-    function getResultLayout(): Layout
+    public function getResultLayout(): Layout
     {
         return $this->result_layout;
     }
@@ -87,14 +94,24 @@ class DatabaseSearch {
     }
 
     /**
-     * Will clean out the field to now show the ignored fields.
-     * @return Field[]
+     * @return bool True if this database has images available for users to see
      */
-    public function getSearchFields(): array {
-        # TODO move this to database
-        $ignoreValues = ['SortNum' => '', 'Accession Numerical' => '', 'Imaged' => '', 'IIFRNo' => '',
-            'Photographs::photoFileName' => '', 'Event::eventDate' => '', 'card01' => '', 'Has Image' => '', 'imaged' => ''];
-        return array_diff_key($this->search_layout->getFields(), $ignoreValues);
+    public function hasImages(): bool {
+        $databases_with_images = ['fish', 'avian', 'herpetology', 'mammal', 'vwsp', 'bryophytes',
+            'fungi', 'lichen', 'algae'];
+        return in_array($this->name, $databases_with_images);
+    }
+
+    /**
+     * @return string The name of this database in a clean and readable format
+     */
+    public function getCleanName(): string {
+        return match ($this->name) {
+            "mi" => "Dry Marine Invertebrate",
+            "miw" => "Wet Marine Invertebrate",
+            "vwsp" => "Vascular",
+            default => ucfirst($this->name)
+        };
     }
 
     /**
@@ -131,6 +148,17 @@ class DatabaseSearch {
     }
 
     /**
+     * Will clean out the field to now show the ignored fields.
+     * @return Field[]
+     */
+    public function getSearchFields(): array {
+        # TODO move this to database
+        $ignoreValues = ['SortNum' => '', 'Accession Numerical' => '', 'Imaged' => '', 'IIFRNo' => '',
+            'Photographs::photoFileName' => '', 'Event::eventDate' => '', 'card01' => '', 'Has Image' => '', 'imaged' => ''];
+        return array_diff_key($this->search_layout->getFields(), $ignoreValues);
+    }
+
+    /**
      * Will query the FileMakerPro API for a result item. The query takes query fields,
      * and also deals with:
      * - data pagination with the pageNumber field
@@ -145,7 +173,7 @@ class DatabaseSearch {
      * @return Result Result or Error (Error if no entries for query too)
      * @throws FileMakerException
      */
-    function queryForResults(int $maxResponseAmount, array $getFields, string $logicalOperator, ?string $sortQuery,
+    public function queryForResults(int $maxResponseAmount, array $getFields, string $logicalOperator, ?string $sortQuery,
                              int $pageNumber, ?string $sortType): Result
     {
 
@@ -157,9 +185,6 @@ class DatabaseSearch {
         /**
          * TODO Fix the Fossils collection, searching is not working! Not even in deployed app.
          */
-
-        # The different strings used in FMP to mean the access number or ID
-        $accessionNumberOptions = ['Accession_Number', 'catalogNumber', 'Accession_No'];
 
         # handle all regular search fields
         foreach ($getFields as $fieldName => $fieldValue) {
@@ -176,42 +201,11 @@ class DatabaseSearch {
                 );
             }
             # handle accession number 'ID' field
-            else if (in_array($fieldName, $accessionNumberOptions)) {
-
-                switch ($this->name) {
-                    case 'vwsp'; case 'bryophytes';
-                    case 'fungi'; case 'lichen'; case 'algae':
-                        $findCommand->addFindCriterion(
-                            fieldName: is_numeric($fieldValue) ? "Accession Numerical" : "Accession Number",
-                            value: $fieldValue
-                        );
-                        break;
-                    case 'fossil'; case 'avian';
-                    case 'herpetology'; case 'mammal':
-                        $findCommand->addFindCriterion(
-                            fieldName: is_numeric($fieldValue) ? "SortNum" : "catalogNumber",
-                            value: $fieldValue
-                        );
-                        break;
-                    case 'mi'; case 'miw':
-                        $findCommand->addFindCriterion(
-                            fieldName: is_numeric($fieldValue) ? "SortNum" : 'Accession No',
-                            value: $fieldValue,
-                        );
-                        break;
-                    case 'fish':
-                        $findCommand->addFindCriterion(
-                            fieldName: 'accessionNo',
-                            value: $fieldValue,
-                        );
-                        break;
-                    case 'entomology':
-                        $findCommand->addFindCriterion(
-                            fieldName: 'SEM #',
-                            value: $fieldValue,
-                        );
-                        break;
-                }
+            else if ($fieldName == $this->getIDFieldName()) {
+                $findCommand->addFindCriterion(
+                    fieldName: $this->getIDFieldName(is_numeric($fieldValue)),
+                    value: $fieldValue
+                );
             }
 
             # all other fields just go in as they come
@@ -280,7 +274,7 @@ class DatabaseSearch {
             "fish" => array('Class', 'Order', 'Family', 'Subfamily', 'nomenNoun', 'specificEpithet'),
             "miw" => array('Phylum', 'Class', 'Family', 'Genus', 'Species'),
             "mi" => array('Phylum', 'Class', 'Family', 'Genus', 'Specific epithet'),
-            "fossil" => array('phylum', 'class', 'family', 'genus', 'specificEpithet'),
+            "fossil" => array('Phylum', 'Class', 'Family', 'Genus', 'Kingdom', 'Subphylum', 'Superclass', 'Subclass', 'Order', 'Suborder', 'Species', 'Common Name'),
         };
 
         $searchFieldNames = $this->search_layout->listFields();
@@ -308,14 +302,15 @@ class DatabaseSearch {
      * @param bool $isNumeric
      * @return string
      */
-    function getIDFieldName(bool $isNumeric = false): string
+    public function getIDFieldName(bool $isNumeric = false): string
     {
         return match ($this->name) {
             'vwsp', 'bryophytes', 'fungi', 'lichen', 'algae' => $isNumeric ? 'Accession Numerical' : 'Accession Number',
-            'fossil', 'avian', 'herpetology', 'mammal' => $isNumeric ? 'SortNum' : 'catalogNumber',
+            'avian', 'herpetology', 'mammal' => $isNumeric ? 'SortNum' : 'catalogNumber',
             'mi', 'miw' => $isNumeric ? 'SortNum' : 'Accession No',
-            'fish' => 'accessionNo',
+            'fish' => 'ID',
             'entomology' => 'SEM #',
+            'fossil' => 'Catalogue Number'
         };
     }
 }
