@@ -54,6 +54,7 @@ if ($_GET['taxon-search'] ?? null) {
         exit;
     }
 }
+
 ?>
 
 <!DOCTYPE html>

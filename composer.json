@@ -1,5 +1,6 @@
 {
   "require": {
-    "airmoi/filemaker": "^2.3"
+    "airmoi/filemaker": "^2.3",
+    "phpoffice/phpspreadsheet": "^1.18"
   }
 }
