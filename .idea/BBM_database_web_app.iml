@@ -7,6 +7,8 @@
       <excludeFolder url="file://$MODULE_DIR$/testSite/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/testSite/vendor/airmoi/filemaker" />
       <excludeFolder url="file://$MODULE_DIR$/testSite/vendor/sunra/php-simple-html-dom-parser" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/airmoi/filemaker" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
