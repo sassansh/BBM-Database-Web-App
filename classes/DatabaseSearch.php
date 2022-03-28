@@ -291,6 +291,22 @@ class DatabaseSearch {
 
         }
 
+        # separate the search text into words for Genus + Species Search
+        $words = explode(' ', $searchText);
+
+        # Perform new find command for Genus + Species Search if 2 words are entered
+        if (count($words) == 2 && strlen($words[0]) > 0 && strlen($words[1]) > 0){
+            $findCommand = $this->fileMaker->newFindCommand($this->search_layout->getName());
+            $findCommand->setLogicalOperator(operator: FileMaker::FIND_AND);
+            $findCommand->addFindCriterion(
+                fieldName: "Genus", value: $words[0]
+            );
+
+            $findCommand->addFindCriterion(
+                fieldName: "Species", value: $words[1]
+            );
+        }
+
         $findCommand->setRange(skip: ($pageNumber - 1) * $maxResponseAmount, max: $maxResponseAmount);
 
         return $findCommand->execute();
