@@ -153,7 +153,7 @@ function echoPaginationButtons(int $page, string $noPageUri, float $maxPages): v
         if ($pageNumber == $page)
             echo "<li class='page-item active'><a class='page-link conditional-text-color' href='$pageUrl'>$pageNumber</a></li>";
         else if ($pageNumber <= 0 or $pageNumber > $maxPages)
-            echo "<li class='page-item disabled'><a class='page-link conditional-text-color' href='$pageUrl'>$pageNumber</a></li>";
+           echo "";
         else
             echo "<li class='page-item'><a class='page-link conditional-text-color' href='$pageUrl'>$pageNumber</a></li>";
     }
