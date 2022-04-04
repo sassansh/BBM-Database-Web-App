@@ -34,7 +34,8 @@ $usefulGETFields = array_filter($_GET);
 
 if ($_GET['taxon-search'] ?? null) {
     try {
-        $result = $databaseSearch->queryTaxonSearch($_GET['taxon-search'], $maxResponses, $_GET['Page'] ?? 1);
+        $result = $databaseSearch->queryTaxonSearch($_GET['taxon-search'], $maxResponses, $_GET['Page'] ?? 1,
+        $_GET['Sort'] ?? null, $_GET['SortOrder'] ?? null);
     } catch (FileMakerException $e) {
         $_SESSION['error'] = $e->getMessage();
         header('Location: error.php');
@@ -241,11 +242,31 @@ if ($_GET['taxon-search'] ?? null) {
                 <table class="table table-hover table-striped" id="table">
                     <thead>
                         <tr>
-                            <?php foreach ($tableData->getTableHeads(page: $_GET['Page'] ?? 1, requestUri: $_SERVER['REQUEST_URI']) as $id => $href): ?>
+                            <?php foreach ($tableData->getTableHeads(page: $_GET['Page'] ?? 1,
+                                requestUri: $_SERVER['REQUEST_URI'], sort: ($_GET['Sort'] ?? ''),
+                                sortOrder: ($_GET['SortOrder'] ?? '') ) as $id => $href): ?>
                                 <th scope="col" id="<?= $id ?>" class="text-center">
                                     <a href="<?= $href ?>" class="table-col-header conditional-text-color" role="button">
                                         <!-- field name -->
-                                        <b><?= $id ?></b>
+                                        <!-- if id equal to sort order, make italic -->
+                                        <?php $semNumPrinted = false ?>
+                                        <?php if (isset($_GET['Sort']) and $id == $_GET['Sort'] and $_GET['SortOrder'] == 'Ascend'): ?>
+                                            <b><?= $id ?>▲</b>
+                                        <?php endif; ?>
+                                        <?php if (isset($_GET['Sort']) and $id == $_GET['Sort'] and $_GET['SortOrder'] == 'Descend'): ?>
+                                            <b><?= $id ?>▼</b>
+                                        <?php endif; ?>
+                                        <?php if (isset($_GET['Sort']) and 'SEM Number' == $id and $_GET['Sort'] == 'SEM #' and $_GET['SortOrder'] == 'Ascend'): ?>
+                                            <b><?= $id ?>▲</b>
+                                            <?php $semNumPrinted = true ?>
+                                        <?php endif; ?>
+                                        <?php if (isset($_GET['Sort']) and 'SEM Number' == $id and $_GET['Sort'] == 'SEM #' and $_GET['SortOrder'] == 'Descend'): ?>
+                                            <b><?= $id ?>▼</b>
+                                            <?php $semNumPrinted = true ?>
+                                        <?php endif; ?>
+                                        <?php if (!isset($_GET['Sort']) or $_GET['Sort'] != $id and !$semNumPrinted): ?>
+                                            <b><?= $id ?></b>
+                                        <?php endif; ?>
                                     </a>
                                 </th>
                             <?php endforeach; ?>

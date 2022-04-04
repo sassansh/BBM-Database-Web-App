@@ -35,8 +35,7 @@ class TableData
      * @param string $sortOrder
      * @return array
      */
-    public function getTableHeads(int $page,
-                                  string $requestUri, string $sortOrder = 'Descend'): array
+    public function getTableHeads(int $page, string $requestUri, string $sort, string $sortOrder = 'Descend'): array
     {
 
         # a list with $id => $href for all table heads
@@ -45,15 +44,43 @@ class TableData
         foreach($this->usefulFields as $field) {
             $id = htmlspecialchars(Specimen::FormatFieldName($field));
 
+            $newOrder = 'Ascend';
+
+            if ($sort == $field) {
+                if ($sortOrder == 'Ascend') {
+                    $newOrder = 'Descend';
+                }
+            }
+
             $payloadList = [
                 'Database' => $this->databaseSearch->getName(),
                 'Sort' => $field,
-                'SortOrder' => $sortOrder === 'Descend' ? 'Ascend' : 'Descend',
-                'Page' => $page,
+                'SortOrder' => $newOrder,
             ];
 
             $href = substr($requestUri, 0, strpos($requestUri, '?')) . '?' . http_build_query($payloadList);
             $href = str_replace('%3A', ':', $href);
+
+            # If taxon search, pass the parameter to the href
+            if ($_GET['taxon-search'] ?? null) {
+                $href = $href . "&taxon-search=" . $_GET['taxon-search'];
+            }
+
+            # if advanced search, pass all search parameters to the href
+            $layoutFields = $this->databaseSearch->getSearchLayout()->listFields();
+            $custom_date_fields = array("Year_1", "Month_1", "Day_1", "Collection_Date_1");
+            foreach ($_GET as $key=>$value) {
+                if (in_array($key, $layoutFields) || in_array($key, $custom_date_fields)) {
+                    $href = $href . "&" . $key . "=" . $value;
+                }
+            }
+
+            # add page number to the href
+            $pagePayload = [
+                'Page' => $page,
+            ];
+
+            $href = $href . '&' . http_build_query($pagePayload);
 
             $data[$id] = $href;
         }

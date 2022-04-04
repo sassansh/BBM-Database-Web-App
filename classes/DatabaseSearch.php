@@ -231,10 +231,6 @@ class DatabaseSearch {
                 }
             }
 
-            # for entomology and fish we can only sort by accession number? TODO check this!
-            if($this->name == 'entomology') {
-                $sortBy = 'SEM #';
-            }
             if($this->name == 'fish') {
                 $sortBy = 'accessionNo';
             }
@@ -242,6 +238,13 @@ class DatabaseSearch {
             # handles the order of the sort
             $findCommand->addSortRule(fieldName:  str_replace('+', ' ', $sortBy), precedence: 1,
                 order: $sortType === 'Descend' ? FileMaker::SORT_DESCEND : FileMaker::SORT_ASCEND);
+        } else {
+            if($this->name == 'entomology') {
+                $sortBy = 'SEM #';
+                $findCommand->addSortRule(fieldName:  str_replace('+', ' ', $sortBy), precedence: 1,
+                    order: FileMaker::SORT_ASCEND);
+            }
+
         }
 
         # handle different table pages
@@ -260,7 +263,8 @@ class DatabaseSearch {
      * @return Result
      * @throws FileMakerException
      */
-    public function queryTaxonSearch(string $searchText, int $maxResponseAmount = 50, int $pageNumber = 1): Result
+    public function queryTaxonSearch(string $searchText, int $maxResponseAmount = 50, int $pageNumber = 1,
+                                     ?string $sortQuery, ?string $sortType): Result
     {
         $findCommand = $this->fileMaker->newFindCommand($this->search_layout->getName());
         $findCommand->setLogicalOperator(operator: FileMaker::FIND_OR);
@@ -305,6 +309,41 @@ class DatabaseSearch {
             $findCommand->addFindCriterion(
                 fieldName: "Species", value: $words[1]
             );
+
+        }
+
+
+        # handle the sort property
+        if (isset($sortQuery) and $sortQuery != '') {
+
+            # preliminary sort query, will only change in certain situations
+            $sortBy = $sortQuery;
+
+            # accession number sort is different for databases, handle it here
+            if (Specimen::mapFieldName($sortQuery) === 'Accession Number') {
+                if ($this->name == 'vwsp' or $this->name == 'bryophytes' or
+                    $this->name == 'fungi' or $this->name == 'lichen' or $this->name == 'algae') {
+                    $sortBy = 'Accession Numerical';
+                }
+                else {
+                    $sortBy = 'sortNum';
+                }
+            }
+
+            if($this->name == 'fish') {
+                $sortBy = 'accessionNo';
+            }
+
+            # handles the order of the sort
+            $findCommand->addSortRule(fieldName:  str_replace('+', ' ', $sortBy), precedence: 1,
+                order: $sortType === 'Descend' ? FileMaker::SORT_DESCEND : FileMaker::SORT_ASCEND);
+        } else {
+            if($this->name == 'entomology') {
+                $sortBy = 'SEM #';
+                $findCommand->addSortRule(fieldName:  str_replace('+', ' ', $sortBy), precedence: 1,
+                    order: FileMaker::SORT_ASCEND);
+            }
+
         }
 
         $findCommand->setRange(skip: ($pageNumber - 1) * $maxResponseAmount, max: $maxResponseAmount);
