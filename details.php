@@ -63,35 +63,57 @@ if(isset($_SERVER['HTTP_REFERER'])) {
             <!-- basic info plus images -->
             <div class="row px-1 py-3">
                 <!-- information pane -->
-                <div class="col-8 d-flex flex-column flex-md-row flex-md-wrap justify-content-center align-items-start align-items-md-end">
+                <div class="col-md-8 d-flex flex-column flex-md-row flex-md-wrap justify-content-center align-items-start align-items-md-end">
+                    <div class="container">
                     <?php
                     $count = 0;
-                    foreach ($specimen->getFieldData() as $fieldName => $fieldValue): ?>
-                        <div class="px-3 py-2 py-md-2 flex-fill responsive-columns-2">
+                    $fieldData = $specimen->getFieldData();
+                    list($fieldData1, $fieldData2) = array_chunk($fieldData, ceil(count($fieldData) / 2), true);
+                    foreach ($fieldData1 as $fieldName => $fieldValue): ?>
+                        <div class="row">
                             <!-- field name and value -->
-                            <div class="input-group">
-                                <!-- field name with a to open collapsed info -->
-                                <a data-bs-toggle="collapse" href="#collapsable<?php echo $count?>" role="button">
-                                    <label class="input-group-text conditional-background-light"
-                                           for="field-<?php echo htmlspecialchars($fieldName)?>">
-                                        <?php echo htmlspecialchars(Specimen::FormatFieldName($fieldName)) ?>
-                                    </label>
-                                </a>
+                            <div class="input-group col-lg px-3 py-2 py-md-2">
+                                <div class="input-group">
+                                    <!-- field name with a to open collapsed info -->
+                                    <a data-bs-toggle="collapse" href="#collapsable<?php echo $count?>" role="button">
+                                        <label class="input-group-text conditional-background-light"
+                                               for="field-<?php echo htmlspecialchars($fieldName)?>">
+                                            <?php echo htmlspecialchars(Specimen::FormatFieldName($fieldName)) ?>
+                                        </label>
+                                    </a>
 
-                                <!-- field value -->
-                                <input class="form-control" type="text"
-                                       id="field-<?php echo htmlspecialchars($fieldName)?>"
-                                       name="<?php echo htmlspecialchars($fieldName)?>"
-                                       readonly disabled value="<?php echo $fieldValue == '' ? '---' : $fieldValue ?>" >
-                            </div>
-                            <!-- field information -->
-                            <div class="collapse" id="collapsable<?=$count?>">
-                                <div class="card card-body">
-                                    This is some information for field <?=$fieldName?>!
+                                    <!-- field value -->
+                                    <input class="form-control" type="text"
+                                           id="field-<?php echo htmlspecialchars($fieldName)?>"
+                                           name="<?php echo htmlspecialchars($fieldName)?>"
+                                           readonly disabled value="<?php echo $fieldValue == '' ? '---' : $fieldValue ?>" >
                                 </div>
                             </div>
+
+                            <?php if($count < sizeof($fieldData2)) : ?>
+
+                            <div class="input-group col-lg px-3 py-2 py-md-2">
+                                <div class="input-group">
+                                    <!-- field name with a to open collapsed info -->
+                                    <a data-bs-toggle="collapse" href="#collapsable<?php echo $count + count($fieldData1)?>" role="button">
+                                        <label class="input-group-text conditional-background-light"
+                                               for="field-<?php echo htmlspecialchars(array_keys($fieldData2)[$count])?>">
+                                            <?php echo htmlspecialchars(Specimen::FormatFieldName(array_keys($fieldData2)[$count])) ?>
+                                        </label>
+                                    </a>
+
+                                    <!-- field value -->
+                                    <input class="form-control" type="text"
+                                           id="field-<?php echo htmlspecialchars(array_keys($fieldData2)[$count])?>"
+                                           name="<?php echo htmlspecialchars(array_keys($fieldData2)[$count])?>"
+                                           readonly disabled value="<?php echo $fieldData2[array_keys($fieldData2)[$count]] == '' ? '---' : $fieldData2[array_keys($fieldData2)[$count]] ?>" >
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
                         </div>
                     <?php $count++; endforeach; ?>
+                    </div>
                 </div>
 
                 <!-- image slideshow -->
@@ -151,7 +173,7 @@ if(isset($_SERVER['HTTP_REFERER'])) {
             <!-- location map and information -->
             <div class="row px-1 py-3">
                 <!-- map -->
-                <div class="col-5">
+                <div class="col-md-4">
                     <div class="rounded rounded-3 border border-3 conditional-background-light-no-hover-25 p-3">
                         <?php if($specimen->getLatitude() !== null && $specimen->getLongitude() !== null) : ?>
                             <h3 class="display-6 mb-0 conditional-color">Map:</h3>
@@ -172,11 +194,17 @@ if(isset($_SERVER['HTTP_REFERER'])) {
                 </div>
 
                 <!-- information pane -->
-                <div class="col d-flex flex-column flex-md-row flex-md-wrap justify-content-center align-items-start align-items-md-end align-content-start">
+                <div class="col-md-8 d-flex flex-column flex-md-row flex-md-wrap justify-content-center align-items-start align-items-md-end align-content-start">
+                    <div class="container">
                     <?php
-                    foreach ($specimen->getLocationData() as $fieldName => $fieldValue): ?>
-                        <div class="px-3 py-2 py-md-2 flex-fill responsive-columns-2">
+                    $count = 0;
+                    $locationData = $specimen->getLocationData();
+                    list($locationData1, $locationData2) = array_chunk($locationData, ceil(count($locationData) / 2), true);
+
+                    foreach ($locationData1 as $fieldName => $fieldValue): ?>
+                        <div class="row">
                             <!-- field name and value -->
+                            <div class="col-lg px-3 py-2 py-md-2">
                             <div class="input-group">
                                 <!-- field name with a to open collapsed info -->
                                 <a data-bs-toggle="collapse" href="#collapsable<?php echo $count?>" role="button">
@@ -192,14 +220,33 @@ if(isset($_SERVER['HTTP_REFERER'])) {
                                        name="<?php echo htmlspecialchars($fieldName)?>"
                                        readonly disabled value="<?php echo $fieldValue == '' ? '---' : $fieldValue ?>" >
                             </div>
-                            <!-- field information -->
-                            <div class="collapse" id="collapsable<?=$count?>">
-                                <div class="card card-body">
-                                    This is some information for field <?=$fieldName?>!
+                            </div>
+
+                            <?php if($count < sizeof($locationData2)) : ?>
+
+                            <div class="col-lg px-3 py-2 py-md-2">
+                                <div class="input-group">
+                                    <!-- field name with a to open collapsed info -->
+                                    <a data-bs-toggle="collapse" href="#collapsable<?php echo $count + count($locationData1)?>" role="button">
+                                        <label class="input-group-text conditional-background-light"
+                                               for="field-<?php echo htmlspecialchars(array_keys($locationData2)[$count])?>">
+                                            <?php echo htmlspecialchars(Specimen::FormatFieldName(array_keys($locationData2)[$count])) ?>
+                                        </label>
+                                    </a>
+
+                                    <!-- field value -->
+                                    <input class="form-control" type="text"
+                                           id="field-<?php echo htmlspecialchars(array_keys($locationData2)[$count])?>"
+                                           name="<?php echo htmlspecialchars(array_keys($locationData2)[$count])?>"
+                                           readonly disabled value="<?php echo $locationData2[array_keys($locationData2)[$count]] == '' ? '---' : $locationData2[array_keys($locationData2)[$count]] ?>" >
                                 </div>
                             </div>
+
+                            <?php endif; ?>
+
                         </div>
                         <?php $count++; endforeach; ?>
+                    </div>
                 </div>
             </div>
         </div>
