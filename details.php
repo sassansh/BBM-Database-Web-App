@@ -72,7 +72,7 @@ if(isset($_SERVER['HTTP_REFERER'])) {
                     foreach ($fieldData1 as $fieldName => $fieldValue): ?>
                         <div class="row">
                             <!-- field name and value -->
-                            <div class="input-group col-lg px-3 py-2 py-md-2">
+                            <div class="input-group col-lg px-3 py-2 py-md-3">
                                 <div class="input-group">
                                     <!-- field name with a to open collapsed info -->
                                     <a data-bs-toggle="collapse" href="#collapsable<?php echo $count?>" role="button">
@@ -92,7 +92,7 @@ if(isset($_SERVER['HTTP_REFERER'])) {
 
                             <?php if($count < sizeof($fieldData2)) : ?>
 
-                            <div class="input-group col-lg px-3 py-2 py-md-2">
+                            <div class="input-group col-lg px-3 py-2 py-md-3">
                                 <div class="input-group">
                                     <!-- field name with a to open collapsed info -->
                                     <a data-bs-toggle="collapse" href="#collapsable<?php echo $count + count($fieldData1)?>" role="button">
