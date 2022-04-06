@@ -265,7 +265,7 @@ if ($_GET['taxon-search'] ?? null) {
                                             <?php $semNumPrinted = true ?>
                                         <?php endif; ?>
                                         <?php if (!isset($_GET['Sort']) or $_GET['Sort'] != $id and !$semNumPrinted): ?>
-                                            <b><?= $id ?></b>
+                                            <b><?= $id ?>↑↓</b>
                                         <?php endif; ?>
                                     </a>
                                 </th>
