@@ -71,8 +71,8 @@ if (isset($_SESSION['databaseSearch']) and ($_SESSION['databaseSearch'])->getNam
             </div>
 
             <div class="collapse w-100" id="advancedSearchDiv">
-                <div class="d-flex justify-content-around align-items-center px-5 py-3">
-                    <form action="render.php" method="get" id="submit-form">
+                <div class="row px-5 py-3">
+                    <form action="render.php" method="get" id="submit-form" >
                         <!-- hidden text field containing the database name -->
                         <label>
                             <input type="text" hidden id="Database" name="Database" value=<?php echo htmlspecialchars(DATABASE); ?>>
@@ -82,17 +82,20 @@ if (isset($_SESSION['databaseSearch']) and ($_SESSION['databaseSearch'])->getNam
                             using flex and media queries, we have one, two or three columns
                             refer to the view css to media queries, we followed bootstrap cutoffs
                          -->
-                        <div class="d-flex flex-column flex-md-row flex-md-wrap justify-content-center align-items-start align-items-md-end">
-                            <?php
+
+                        <div class="container">
+                        <?php
                             # Loop over all fields and create a field element in the form for each!
                             $count = 0;
+                            $allFieldNames = $databaseSearch->getSearchFields();
+                            list($layoutFields1, $layoutFields2) = array_chunk($allFieldNames, ceil(count($allFieldNames) / 2), true);
                             /** @var string $fieldName
                              * @var Field $field */
-                            foreach ($databaseSearch->getSearchFields() as $fieldName => $field) : ?>
+                            foreach ($layoutFields1 as $fieldName => $field) : ?>
 
-                                <div class="px-3 py-2 py-md-1 flex-fill responsive-columns-3">
+                                <div class="row">
                                     <!-- field name and input -->
-                                    <div class="input-group">
+                                    <div class="input-group col-lg p-1">
                                         <!-- field name with a to open collapsed info -->
                                         <a data-bs-toggle="collapse" href="#collapsable<?php echo $count?>" role="button">
                                             <label class="input-group-text conditional-background-light"
@@ -121,15 +124,43 @@ if (isset($_SESSION['databaseSearch']) and ($_SESSION['databaseSearch'])->getNam
                                                    name="<?php echo htmlspecialchars($fieldName)?>">
                                         <?php endif; ?>
                                     </div>
-                                    <!-- field information -->
-                                    <div class="collapse" id="collapsable<?=$count?>">
-                                        <div class="card card-body">
-                                            This is some information for field <?=$fieldName?>!
-                                        </div>
+
+                                    <?php if($count < sizeof($layoutFields2)) : ?>
+
+                                    <div class="input-group col-lg p-1">
+                                        <!-- field name with a to open collapsed info -->
+                                        <a data-bs-toggle="collapse" href="#collapsable<?php echo $count + count($layoutFields1)?>" role="button">
+                                            <label class="input-group-text conditional-background-light"
+                                                   for="field-<?php echo htmlspecialchars(array_keys($layoutFields2)[$count])?>">
+                                                <?php echo htmlspecialchars(Specimen::FormatFieldName(array_keys($layoutFields2)[$count])) ?>
+                                            </label>
+                                        </a>
+                                        <?php
+                                        # Try to get a list of options, if error (aka none available) then no datalist
+                                        try {
+                                            $fieldValues = $layoutFields2[array_keys($layoutFields2)[$count]]->getValueList();
+                                        } catch (FileMakerException $e) { /* Do nothing */ }
+
+                                        if (isset($fieldValues)) : ?>
+                                            <input class="form-control" list="datalistOptions"
+                                                   placeholder="Type to search" id="field-<?php echo htmlspecialchars(array_keys($layoutFields2)[$count])?>"
+                                                   name="<?php echo htmlspecialchars(array_keys($layoutFields2)[$count])?>">
+                                            <datalist id="datalistOptions">
+                                                <?php foreach ($fieldValues as $fieldValue): ?>
+                                                    <option value="<?=$fieldValue?>"></option>
+                                                <?php endforeach; ?>
+                                            </datalist>
+                                        <?php else: ?>
+                                            <input class="form-control" type="<?php echo $layoutFields2[array_keys($layoutFields2)[$count]]->getResult() ?>"
+                                                   id="field-<?php echo htmlspecialchars(array_keys($layoutFields2)[$count])?>"
+                                                   name="<?php echo htmlspecialchars(array_keys($layoutFields2)[$count])?>">
+                                        <?php endif; ?>
                                     </div>
+                                    <?php endif; ?>
                                 </div>
                                 <?php $count++; endforeach; ?>
-                        </div>
+
+                </div>
 
                         <!-- search ops and submit button -->
                         <div class="d-inline-flex justify-content-evenly align-items-center py-4 w-100">
