@@ -129,7 +129,7 @@ if (isset($_SERVER['HTTP_REFERER'])) {
                     <h3 class="display-6 mb-0 conditional-color">Images:</h3>
                     <hr class="conditional-color mt-1">
                     <div id="imageCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-indicators">
+                        <div class="carousel-indicators ">
                             <!-- loop over each image to add a button -->
                             <?php foreach ($specimen->getImages() as $index => $image): ?>
                                 <button type="button" data-bs-target="#imageCarousel" data-bs-slide-to="<?= $index ?>"
@@ -274,10 +274,20 @@ if (isset($_SERVER['HTTP_REFERER'])) {
 
 </body>
 <!--    Javascript code to enable tooltips-->
-echo("
+
 <script>var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
-    })</script>
-");
+    })
+</script>
+
+
+
+<style>
+    .carousel-indicators {
+        position: absolute;
+        bottom: -15px;
+    }
+</style>
+
 </html>
