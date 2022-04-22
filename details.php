@@ -61,10 +61,10 @@ if (isset($_SERVER['HTTP_REFERER'])) {
 
 <div class="container-fluid flex-grow-1">
     <!-- basic info plus images -->
-    <div class="row px-1 py-3">
+    <div class="row px-1 py-3" >
         <!-- information pane -->
-        <div class="col-md-8 d-flex flex-column flex-md-row flex-md-wrap justify-content-center align-items-start align-items-md-end">
-            <div class="container">
+        <div class="col-md-8">
+            <div class="container-fluid mx-0">
                 <?php
                 $count = 0;
                 $fieldData = $specimen->getFieldData();
@@ -207,8 +207,8 @@ if (isset($_SERVER['HTTP_REFERER'])) {
         </div>
 
         <!-- information pane -->
-        <div class="col-md-8 d-flex flex-column flex-md-row flex-md-wrap justify-content-center align-items-start align-items-md-end align-content-start">
-            <div class="container">
+        <div class="col-md-8">
+            <div class="container-fluid mx-0">
                 <?php
                 $count = 0;
                 $locationData = $specimen->getLocationData();

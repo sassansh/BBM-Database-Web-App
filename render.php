@@ -34,8 +34,9 @@ $usefulGETFields = array_filter($_GET);
 
 if ($_GET['taxon-search'] ?? null) {
     try {
-        $result = $databaseSearch->queryTaxonSearch($_GET['taxon-search'], $maxResponses, $_GET['Page'] ?? 1,
-        $_GET['Sort'] ?? null, $_GET['SortOrder'] ?? null);
+        $result = $databaseSearch->queryTaxonSearch($_GET['taxon-search'], $_GET['Sort'] ?? null,
+            $_GET['SortOrder'] ?? null,$maxResponses, $_GET['Page'] ?? 1);
+        ;
     } catch (FileMakerException $e) {
         $_SESSION['error'] = $e->getMessage();
         header('Location: error.php');

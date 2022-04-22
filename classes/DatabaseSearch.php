@@ -263,8 +263,8 @@ class DatabaseSearch {
      * @return Result
      * @throws FileMakerException
      */
-    public function queryTaxonSearch(string $searchText, int $maxResponseAmount = 50, int $pageNumber = 1,
-                                     ?string $sortQuery, ?string $sortType): Result
+    public function queryTaxonSearch(string $searchText, ?string $sortQuery, ?string $sortType,
+                                     int $maxResponseAmount = 50, int $pageNumber = 1): Result
     {
         $findCommand = $this->fileMaker->newFindCommand($this->search_layout->getName());
         $findCommand->setLogicalOperator(operator: FileMaker::FIND_OR);
