@@ -302,13 +302,53 @@ class DatabaseSearch {
         if (count($words) == 2 && strlen($words[0]) > 0 && strlen($words[1]) > 0){
             $findCommand = $this->fileMaker->newFindCommand($this->search_layout->getName());
             $findCommand->setLogicalOperator(operator: FileMaker::FIND_AND);
-            $findCommand->addFindCriterion(
-                fieldName: "Genus", value: $words[0]
-            );
 
-            $findCommand->addFindCriterion(
-                fieldName: "Species", value: $words[1]
-            );
+            // Entomology, Algae, Bryophytes, Fungi, Lichen, VWSP, MIW, Fossil
+            if (in_array('Genus', $searchFieldNames)) {
+                $findCommand->addFindCriterion(
+                    fieldName: 'Genus', value: $words[0]
+                );
+            }
+
+            if (in_array('Species', $searchFieldNames)) {
+                $findCommand->addFindCriterion(
+                    fieldName: 'Species', value: $words[1]
+                );
+            }
+
+            // Fish: nomenNoun (Genus) + specificEpithet (Species)
+            if (in_array('nomenNoun', $searchFieldNames)) {
+                $findCommand->addFindCriterion(
+                    fieldName: 'nomenNoun', value: $words[0]
+                );
+            }
+
+            if (in_array('specificEpithet', $searchFieldNames)) {
+                $findCommand->addFindCriterion(
+                    fieldName: 'specificEpithet', value: $words[1]
+                );
+            }
+
+            // MI
+            if (in_array('Specific epithet', $searchFieldNames)) {
+                $findCommand->addFindCriterion(
+                    fieldName: 'Specific epithet', value: $words[1]
+                );
+            }
+
+
+            // Avian, Herpetology, Mammal
+            if (in_array('Taxon::genus', $searchFieldNames)) {
+                $findCommand->addFindCriterion(
+                    fieldName: 'Taxon::genus', value: $words[0]
+                );
+            }
+
+            if (in_array('Taxon::specificEpithet', $searchFieldNames)) {
+                $findCommand->addFindCriterion(
+                    fieldName: 'Taxon::specificEpithet', value: $words[1]
+                );
+            }
 
         }
 
