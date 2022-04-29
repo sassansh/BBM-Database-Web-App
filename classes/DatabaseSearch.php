@@ -189,7 +189,12 @@ class DatabaseSearch {
         # handle all regular search fields
         foreach ($getFields as $fieldName => $fieldValue) {
 
-            $layoutField = str_replace("_", " ", $fieldName);
+            if ($this->name == 'vwsp' && str_contains($fieldName, 'Family')) {
+                $layoutField = 'Family_Genus list::Family';
+            } else {
+                $layoutField = str_replace("_", " ", $fieldName);
+            }
+
 
             # handle image field
             if ($fieldName == 'hasImage') {
@@ -238,13 +243,6 @@ class DatabaseSearch {
             # handles the order of the sort
             $findCommand->addSortRule(fieldName:  str_replace('+', ' ', $sortBy), precedence: 1,
                 order: $sortType === 'Descend' ? FileMaker::SORT_DESCEND : FileMaker::SORT_ASCEND);
-        } else {
-            if($this->name == 'entomology') {
-                $sortBy = 'SEM #';
-                $findCommand->addSortRule(fieldName:  str_replace('+', ' ', $sortBy), precedence: 1,
-                    order: FileMaker::SORT_ASCEND);
-            }
-
         }
 
         # handle different table pages
@@ -274,7 +272,9 @@ class DatabaseSearch {
             "avian", "herpetology", "mammal" => array('Taxon::order', 'Taxon::family', 'Taxon::phylum', 'Taxon::genus', 'Taxon::class', 'Taxon::specificEpithet', 'Taxon::infraspecificEpithet'),
             "entomology" => array('Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species', 'Subspecies'),
             "algae" => array('Phylum', 'Class', 'Genus', 'Species', 'Subspecies'),
-            "bryophytes", "fungi", "lichen", "vwsp" => array('Family', 'Genus', 'Species', 'Subspecies'),
+            "bryophytes"  => array('Family', 'Genus', 'Species', 'Subspecies'),
+            "fungi", "lichen"   => array('Genus', 'Species'),
+            "vwsp" => array('Family_Genus list::Family', 'Genus', 'Species', 'Subspecies'),
             "fish" => array('Class', 'Order', 'Family', 'Subfamily', 'nomenNoun', 'specificEpithet'),
             "miw" => array('Phylum', 'Class', 'Family', 'Genus', 'Species'),
             "mi" => array('Phylum', 'Class', 'Family', 'Genus', 'Specific epithet'),
