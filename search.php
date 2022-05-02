@@ -174,7 +174,9 @@ if (isset($_SESSION['databaseSearch']) and ($_SESSION['databaseSearch'])->getNam
                                 <input type="radio" class="btn-check radio-conditional-background" name="operator" id="or" value="or" autocomplete="off">
                                 <label class="btn btn-outline-secondary" for="or"> OR </label>
                             </div>
-
+                            <button class="btn btn-primary conditional-background" type="button" data-bs-toggle="collapse" data-bs-target="#searchOperators" aria-expanded="false" aria-controls="searchOperators">
+                                Search Operators
+                            </button>
                             <!-- only with image select, tooltip to explain why disabled -->
                             <div class="form-check form-switch" <?php if (!$databaseSearch->hasImages()) echo 'data-bs-toggle="tooltip" title="No images available"' ?>>
                                 <label class="form-check-label">
@@ -186,6 +188,42 @@ if (isset($_SESSION['databaseSearch']) and ($_SESSION['databaseSearch'])->getNam
                             <!-- submit button -->
                             <div class="form-group">
                                 <button type="submit" onclick="submitForm()" class="btn btn-outline-primary conditional-background"> Advanced Search </button>
+                            </div>
+                        </div>
+                        <div class="collapse mx-5" id="searchOperators">
+                            <div class="card card-body">
+                                    <div class="row">
+                                        <div class="col-sm-1"> == </div>
+                                        <div class="col-sm-11"> match entire field exactly </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-1"> &lt; </div>
+                                        <div class="col-sm-11"> find records with values less than to the one specified </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-1"> &lt;= </div>
+                                        <div class="col-sm-11">  find records with values less than or equal to the one specified </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-1"> &gt; </div>
+                                        <div class="col-sm-11">  find records with values greater than to the one specified </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-1"> &gt;= </div>
+                                        <div class="col-sm-11">  find records with values greater than or equal to the one specified </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-1"> ... </div>
+                                        <div class="col-sm-11">  find records with values in a range (Ex. 10...20) </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-1"> * </div>
+                                        <div class="col-sm-11">  match zero or more characters </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-1"> \ </div>
+                                        <div class="col-sm-11">  escape any character </div>
+                                    </div>
                             </div>
                         </div>
                     </form>
