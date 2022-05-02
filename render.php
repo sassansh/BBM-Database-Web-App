@@ -56,6 +56,64 @@ if ($_GET['taxon-search'] ?? null) {
         exit;
     }
 }
+
+if($_SERVER['REQUEST_METHOD'] == "POST" and isset($_POST['downloadData']))
+{
+    createAndDownloadCSV();
+}
+function createAndDownloadCSV(): void
+{
+    $result = getDownloadData();
+    ob_clean();
+    $file = fopen("data.csv", "w");
+    $fieldNames = $result->getFields();
+    fputcsv($file, $fieldNames);
+    foreach ($result->getRecords() as $record) {
+        $row = array();
+        foreach ($fieldNames as $field) {
+            $row[] = $record->getFieldUnencoded($field);
+        }
+        fputcsv($file, $row);
+    }
+    fclose($file);
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="data.csv"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: ' . filesize('data.csv'));
+    readfile('data.csv');
+    unlink('data.csv');
+}
+
+function getDownloadData(): ?\airmoi\FileMaker\Object\Result
+{
+    $maxDownloadRecords = 1000;
+    $usefulGETFields = array_filter($_GET);
+    $databaseSearch = $_SESSION['databaseSearch'];
+
+    if ($_GET['taxon-search'] ?? null) {
+        try {
+            $result = $databaseSearch->queryTaxonSearch($_GET['taxon-search'], $_GET['Sort'] ?? null,
+                $_GET['SortOrder'] ?? null, $maxDownloadRecords, 1);
+        } catch (FileMakerException $e) {
+            return null;
+        }
+    } else {
+        # since we are diffing by keys, we need to set dummy values
+        $unUsedGETFields = ['operator' => '', 'Sort' => '', 'Page' => '', 'SortOrder' => '', 'Database' => ''];
+        $usefulGETFields = array_diff_key($usefulGETFields, $unUsedGETFields);
+
+        try {
+            $result = $databaseSearch->queryForResults($maxDownloadRecords, $usefulGETFields, $_GET['operator'] ?? 'and',
+                $_GET['Sort'] ?? null, 1, $_GET['SortOrder'] ?? null);
+        } catch (FileMakerException $e) {
+            return null;
+        }
+    }
+
+    return $result;
+}
 ?>
 
 <!DOCTYPE html>
@@ -105,9 +163,9 @@ if ($_GET['taxon-search'] ?? null) {
                 </div>
 
                 <!-- download data -->
-                    <a href="#" type="button"
-                       class="btn btn-outline-secondary conditional-outline-background">Download Data</a>
-
+                    <form action="#" method="post">
+                        <input class="btn btn-outline-secondary conditional-outline-background" type="submit" name="downloadData" value="Download Data" />
+                    </form>
                 <!-- start a new search -->
                 <a href="search.php?Database=<?=DATABASE?>" type="button"
                    class="btn btn-outline-secondary conditional-outline-background">New Search</a>
