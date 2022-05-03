@@ -11,7 +11,7 @@
   </p>
 </p>
 
-![Interface](/images/interface.png)
+![Interface](/images/interface.jpg)
 
 ## Table of Contents
 
