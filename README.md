@@ -1,7 +1,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
- <a href="https://github.com/sassansh/BBM_database_web_app">
+ <a href="https://github.com//sassansh/BBM-Database-Web-App">
     <img src="/images/logo.png" alt="Logo" width="80" height="80">
   </a>
   <h2 align="center">BBM Web App</h2>
@@ -36,7 +36,7 @@ You should have [PhpStorm](https://www.jetbrains.com/phpstorm/), [Composer v2.3.
 1. Clone the repo using:
 
    ```bash
-     git clone https://github.com/sassansh/BBM_database_web_app.git
+     git clone https://github.com//sassansh/BBM-Database-Web-App.git
    ```
 
 2. Open the project in PhpStorm.
