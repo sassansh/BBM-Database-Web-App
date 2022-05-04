@@ -96,6 +96,10 @@ class Specimen
         };
 
         foreach ($this->record->getFields() as $fieldName) {
+            // if database name is algae, ignore Class
+            if ($this->database->getName() === "algae" && $fieldName === "Class") {
+                continue;
+            }
 
             if (in_array($fieldName, $locationFieldNames)) {
                 $this->locationData[$fieldName] = $this->record->getField($fieldName);

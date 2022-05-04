@@ -10,7 +10,7 @@ require_once ('my_autoloader.php');
 class TableData
 {
 
-    static array $ignoredFields = ['SortNum', 'Accession Numerical', 'Imaged', 'IIFRNo', 'Photographs::photoFileName',
+    private array $ignoredFields = ['SortNum', 'Accession Numerical', 'Imaged', 'IIFRNo', 'Photographs::photoFileName',
         'Event::eventDate', 'card01', 'Has Image', 'imaged'];
 
     private Result $result;
@@ -23,8 +23,13 @@ class TableData
         $this->result = $result;
         $this->databaseSearch = $databaseSearch;
 
+        // if database is algae, add Class to ignored fields
+        if ($this->databaseSearch->getName() == 'algae') {
+            $this->ignoredFields[] = 'Class';
+        }
+
         # filter out unnecessary fields
-        $this->usefulFields = array_diff($this->databaseSearch->getResultLayout()->listFields(), TableData::$ignoredFields);
+        $this->usefulFields = array_diff($this->databaseSearch->getResultLayout()->listFields(), $this->ignoredFields);
     }
 
     /**

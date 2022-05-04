@@ -2,6 +2,7 @@
 
 use airmoi\FileMaker\FileMakerException;
 use airmoi\FileMaker\Object\Field;
+use airmoi\FileMaker\Object\Result;
 
 require_once('utilities.php');
 require_once ('my_autoloader.php');
@@ -63,38 +64,41 @@ if($_SERVER['REQUEST_METHOD'] == "POST" and isset($_POST['downloadData']))
 }
 function createAndDownloadCSV(): void
 {
-    $result = getDownloadData();
-    ob_clean();
-    $file = fopen("data.csv", "w");
-    $fieldNames = $result->getFields();
+    $filename = "data_" . date("Y-m-d_H-i-s") . ".csv";
+    header('Content-Type: application/csv');
+    header('Content-Disposition: attachment; filename="'.$filename.'";');
+    ob_end_clean();
+
+    $downloadResult = getDownloadData();
+    $file = fopen('php://output', "w");
+    $fieldNames = $downloadResult->getFields();
     fputcsv($file, $fieldNames);
-    foreach ($result->getRecords() as $record) {
+    foreach ($downloadResult->getRecords() as $record) {
         $row = array();
         foreach ($fieldNames as $field) {
-            $row[] = $record->getFieldUnencoded($field);
+            try {
+                $row[] = $record->getField($field, 0, true);
+            } catch (FileMakerException $e) {
+                $row[] = '';
+            }
         }
         fputcsv($file, $row);
     }
-    fclose($file);
-    header('Content-Type: application/octet-stream');
-    header('Content-Disposition: attachment; filename="data.csv"');
-    header('Expires: 0');
-    header('Cache-Control: must-revalidate');
-    header('Pragma: public');
-    header('Content-Length: ' . filesize('data.csv'));
-    readfile('data.csv');
-    unlink('data.csv');
+
+    fclose( $file );
+
+    exit();
 }
 
-function getDownloadData(): ?\airmoi\FileMaker\Object\Result
+function getDownloadData(): ?Result
 {
     $maxDownloadRecords = 1000;
     $usefulGETFields = array_filter($_GET);
-    $databaseSearch = $_SESSION['databaseSearch'];
+    $databaseSearchDownload = $_SESSION['databaseSearch'];
 
     if ($_GET['taxon-search'] ?? null) {
         try {
-            $result = $databaseSearch->queryTaxonSearch($_GET['taxon-search'], $_GET['Sort'] ?? null,
+            $downloadResult = $databaseSearchDownload->queryTaxonSearch($_GET['taxon-search'], $_GET['Sort'] ?? null,
                 $_GET['SortOrder'] ?? null, $maxDownloadRecords, 1);
         } catch (FileMakerException $e) {
             return null;
@@ -105,14 +109,14 @@ function getDownloadData(): ?\airmoi\FileMaker\Object\Result
         $usefulGETFields = array_diff_key($usefulGETFields, $unUsedGETFields);
 
         try {
-            $result = $databaseSearch->queryForResults($maxDownloadRecords, $usefulGETFields, $_GET['operator'] ?? 'and',
+            $downloadResult = $databaseSearchDownload->queryForResults($maxDownloadRecords, $usefulGETFields, $_GET['operator'] ?? 'and',
                 $_GET['Sort'] ?? null, 1, $_GET['SortOrder'] ?? null);
         } catch (FileMakerException $e) {
             return null;
         }
     }
 
-    return $result;
+    return $downloadResult;
 }
 ?>
 
@@ -162,10 +166,36 @@ function getDownloadData(): ?\airmoi\FileMaker\Object\Result
                     <label for="yesImage" class="btn btn-outline-secondary">Yes</label>
                 </div>
 
-                <!-- download data -->
-                    <form action="#" method="post">
-                        <input class="btn btn-outline-secondary conditional-outline-background" type="submit" name="downloadData" value="Download Data" />
-                    </form>
+                <!-- Download Data Button Trigger Modal-->
+                <button type="button" class="btn btn-outline-secondary conditional-outline-background" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Download Data
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="staticBackdropLabel">Download Notice</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                You are only able to download the <strong>first 1000 records</strong> of your search.
+                                If you would like to download a larger amount of data, please contact the database curator or modify your search.
+                                <br><br>
+                                Text about privacy policy....
+                                <br><br>
+                                <strong>Do you accept the privacy terms?</strong>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <form action="#" method="post">
+                                    <input class="btn conditional-background" type="submit" name="downloadData" value="Accept and Download" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- start a new search -->
                 <a href="search.php?Database=<?=DATABASE?>" type="button"
                    class="btn btn-outline-secondary conditional-outline-background">New Search</a>
@@ -191,7 +221,12 @@ function getDownloadData(): ?\airmoi\FileMaker\Object\Result
                                 $count = 0;
                                 /** @var string $fieldName
                                  * @var Field $field */
-                                foreach ($databaseSearch->getSearchLayout()->getFields() as $fieldName => $field) : ?>
+                                $databaseFields = $databaseSearch->getSearchLayout()->getFields();
+                                // if database name is algae, remove Class from the fields
+                                if (DATABASE == "algae") {
+                                    unset($databaseFields['Class']);
+                                }
+                                foreach ($databaseFields as $fieldName => $field) : ?>
 
                                     <div class="px-3 py-2 py-md-1 flex-fill responsive-columns-3">
                                         <!-- field name and input -->

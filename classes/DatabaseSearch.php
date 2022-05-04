@@ -154,7 +154,13 @@ class DatabaseSearch {
     public function getSearchFields(): array {
         # TODO move this to database
         $ignoreValues = ['SortNum' => '', 'Accession Numerical' => '', 'Imaged' => '', 'IIFRNo' => '',
-            'Photographs::photoFileName' => '', 'Event::eventDate' => '', 'card01' => '', 'Has Image' => '', 'imaged' => ''];
+            'Photographs::photoFileName' => '', 'Event::eventDate' => '', 'card01' => '', 'Has Image' => '',
+            'imaged' => ''];
+
+        // If algae database, add Class to ignore
+        if ($this->name === 'algae') {
+            $ignoreValues['Class'] = '';
+        }
         return array_diff_key($this->search_layout->getFields(), $ignoreValues);
     }
 
