@@ -8,6 +8,8 @@
 
   <p align="center">
      A Web App to browse the databases of the Beaty Biodiversity Museum.
+  </p>
+  <p align="center">
      <a href="https://bridge.botany.ubc.ca/herbarium/index.php">Visit live version here</a>.
   </p>
 </p>
