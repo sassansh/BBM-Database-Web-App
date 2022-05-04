@@ -7,7 +7,8 @@
   <h2 align="center">BBM Web App</h2>
 
   <p align="center">
-     A Web App to browse the databases of the Beaty Biodiversity Museum. <a href="https://tools.ietf.org/html/rfc2229">Visit live version here</a>.
+     A Web App to browse the databases of the Beaty Biodiversity Museum.
+     <a href="https://bridge.botany.ubc.ca/herbarium/index.php">Visit live version here</a>.
   </p>
 </p>
 
