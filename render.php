@@ -183,9 +183,12 @@ function getDownloadData(): ?Result
                                 You are only able to download the <strong>first 1000 records</strong> of your search.
                                 If you would like to download a larger amount of data, please contact the database curator or modify your search.
                                 <br><br>
-                                Text about privacy policy....
+                                Data are provided "as is" for informational purposes only. The curators of the collections make no guarantees, either express or implied, about the completeness, accuracy, or currency of the information, or its suitability for any particular purpose. Although each curator strives to provide the most accurate and up-to-date information possible, outdated names, mistaken identifications and erroneous localities can and do occur. Users of the data are urged to verify all data by direct examination of specimens and associated records and to alert the curators (https://beatymuseum.ubc.ca/connect/contact/) of any suspect data records.
+                                When you use these data, please acknowledge the Beaty Biodiversity Museum and the specific collection you extracted data from, and when possible, please use the citation below.
                                 <br><br>
-                                <strong>Do you accept the privacy terms?</strong>
+                                UBC Beaty Biodiversity Museum Collections, <?php echo date("Y"); ?>. Data obtained from the collection <?php echo $databaseSearch->getCleanName(); ?>. https://bridge.botany.ubc.ca/herbarium/index.php. Accessed <?php echo date("Y-m-d"); ?>.
+                                <br><br>
+                                <strong>Do you accept the these terms?</strong>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
